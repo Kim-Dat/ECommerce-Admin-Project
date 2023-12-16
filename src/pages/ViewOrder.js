@@ -1,32 +1,18 @@
 import { SearchOutlined } from "@ant-design/icons";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Highlighter from "react-highlight-words";
 import { Button, Input, Space, Table } from "antd";
-import { useDispatch, useSelector } from "react-redux";
-import {
-    deleteBrand,
-    getBrands,
-    resetState,
-} from "../features/brand/brandSlice";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { BiEdit } from "react-icons/bi";
 import { MdOutlineDelete } from "react-icons/md";
-import CustomModal from "../components/CustomModal";
+import { getOrderUserById } from "../features/order/orderSlice";
+import { useDispatch, useSelector } from "react-redux";
 
-const Brandlist = () => {
+const ViewOrder = () => {
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
-    const [open, setOpen] = useState(false);
-    const [brandId, setBrandId] = useState("");
-    /* modal */
-    const showModal = (e) => {
-        setOpen(true);
-        setBrandId(e);
-    };
-    const hideModal = () => {
-        setOpen(false);
-    };
-    /* table */
+    const location = useLocation();
+    const userId = location.pathname.split("/")[3];
     const searchInput = useRef(null);
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -38,13 +24,7 @@ const Brandlist = () => {
         setSearchText("");
     };
     const getColumnSearchProps = (dataIndex) => ({
-        filterDropdown: ({
-            setSelectedKeys,
-            selectedKeys,
-            confirm,
-            clearFilters,
-            close,
-        }) => (
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
             <div
                 style={{
                     padding: 8,
@@ -55,12 +35,8 @@ const Brandlist = () => {
                     ref={searchInput}
                     placeholder={`Search ${dataIndex}`}
                     value={selectedKeys[0]}
-                    onChange={(e) =>
-                        setSelectedKeys(e.target.value ? [e.target.value] : [])
-                    }
-                    onPressEnter={() =>
-                        handleSearch(selectedKeys, confirm, dataIndex)
-                    }
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
                     style={{
                         marginBottom: 8,
                         display: "block",
@@ -69,9 +45,7 @@ const Brandlist = () => {
                 <Space>
                     <Button
                         type="primary"
-                        onClick={() =>
-                            handleSearch(selectedKeys, confirm, dataIndex)
-                        }
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
                         icon={<SearchOutlined />}
                         size="small"
                         style={{
@@ -81,9 +55,7 @@ const Brandlist = () => {
                         Search
                     </Button>
                     <Button
-                        onClick={() =>
-                            clearFilters && handleReset(clearFilters)
-                        }
+                        onClick={() => clearFilters && handleReset(clearFilters)}
                         size="small"
                         style={{
                             width: 90,
@@ -110,11 +82,7 @@ const Brandlist = () => {
                 }}
             />
         ),
-        onFilter: (value, record) =>
-            record[dataIndex]
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
+        onFilter: (value, record) => record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: (visible) => {
             if (visible) {
                 setTimeout(() => searchInput.current?.select(), 100);
@@ -143,7 +111,7 @@ const Brandlist = () => {
             width: "5%",
         },
         {
-            title: "Title",
+            title: "Product Name",
             dataIndex: "title",
             key: "title",
             width: "25%",
@@ -152,62 +120,57 @@ const Brandlist = () => {
             sortDirections: ["descend", "ascend"],
         },
         {
-            title: "Action",
-            dataIndex: "action",
-            key: "action",
+            title: "Brand",
+            dataIndex: "brand",
+            key: "brand",
+            width: "20%",
+        },
+        {
+            title: "Quantity",
+            dataIndex: "count",
+            key: "count",
+            width: "20%",
+        },
+        {
+            title: "Price",
+            dataIndex: "price",
+            key: "price",
+            width: "20%",
+        },
+        {
+            title: "Total Price",
+            dataIndex: "total_price",
+            key: "price",
+            width: "20%",
+        },
+        {
+            title: "Color",
+            dataIndex: "color",
+            key: "color",
             width: "15%",
         },
     ];
-    /* handle */
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(resetState());
-        dispatch(getBrands());
+        dispatch(getOrderUserById(userId));
     }, []);
-    const { brands } = useSelector((state) => state.brand);
-    const handleBrand = brands.map((brand, index) => ({
-        ...brand,
-        action: (
-            <div className="d-flex align-items-center flex-nowrap justify-content-start">
-                <Link
-                    to={`/admin/brand/${brand._id}`}
-                    className="fs-4 text-primary"
-                >
-                    <BiEdit />
-                </Link>
-                <button
-                    className="ms-3 fs-3 text-danger bg-transparent border-0"
-                    onClick={() => showModal(brand._id)}
-                >
-                    <MdOutlineDelete />
-                </button>
-            </div>
-        ),
+    const products = useSelector((state) => state?.order?.orderUserId?.orderItems) || [];
+    const handleProducts = products.map((product, index) => ({
+        title: product.productId.title,
+        brand: product.productId.brand,
+        count: product.quantity,
+        price: product.productId.price,
+        total_price: product.productId.price * product.quantity,
+        color: <div className="rounded-circle" style={{ backgroundColor: product.color.title, width: "20px", height: "20px" }}></div>,
         key: index + 1,
     }));
-    const handleDeleteBrand = async (e) => {
-        setOpen(false);
-        await dispatch(deleteBrand(e));
-        await dispatch(getBrands());
-    };
+
     return (
         <div>
-            <h3 className="mb-5 title">Brands</h3>
-            <Table
-                columns={columns}
-                dataSource={handleBrand}
-                className="box-shadow"
-            />
-            <CustomModal
-                hideModal={hideModal}
-                open={open}
-                performAction={() => {
-                    handleDeleteBrand(brandId);
-                }}
-                title="Are you sure you want to delete this brand?"
-            />
+            <h3 className="mb-5 title">View Order</h3>
+            <Table columns={columns} dataSource={handleProducts} className="box-shadow" />
         </div>
     );
 };
 
-export default Brandlist;
+export default ViewOrder;

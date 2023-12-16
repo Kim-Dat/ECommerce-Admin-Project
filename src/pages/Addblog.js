@@ -7,19 +7,47 @@ import { deleteImg, uploadImg } from "../features/upLoad/uploadSlice";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { getBlogCategories } from "../features/bCategory/bCategorySilce";
-import { createBlog, resetState } from "../features/blog/blogSlice";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getBlogCategories } from "../features/bCategory/bCategorySlice";
+import {
+    createBlog,
+    getBlog,
+    resetState,
+    updateBlog,
+} from "../features/blog/blogSlice";
 let yup = require("yup");
-const Addblog = () => {
+const AddBlog = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { images } = useSelector((state) => state.upload);
+    const images = useSelector((state) => state.upload.images) || [];
     const { bCategories } = useSelector((state) => state.blogCategory);
-    const { isSuccess, isError, isLoading, createdBlog } = useSelector((state) => state.blog);
+    const location = useLocation();
+    const BlogId = location.pathname.split("/")[3];
+    const {
+        isSuccess,
+        isError,
+        isLoading,
+        createdBlog,
+        blogCate,
+        blogDesc,
+        blogName,
+        blogImages,
+        updatedBlog,
+    } = useSelector((state) => state.blog);
+    useEffect(() => {
+        if (!!BlogId) {
+            dispatch(getBlog(BlogId));
+            img.push(blogImages);
+        } else {
+            dispatch(resetState());
+        }
+    }, [BlogId]);
     useEffect(() => {
         if (isSuccess && createdBlog) {
             toast.success("Blog Added Successfully");
+        }
+        if (isSuccess && updatedBlog) {
+            toast.success("Blog Update Successfully");
         }
         if (isError) {
             toast.error("something went wrong !!!");
@@ -30,40 +58,54 @@ const Addblog = () => {
         category: yup.string().required("Category is Required"),
         description: yup.string().required("Description is Required"),
     });
-    const newImages = () => {
-        const getImages = [];
-        images.forEach((image) => {
-            getImages.push({ public_id: image.public_id, url: image.url });
+
+    const img = [];
+    images?.forEach((i) => {
+        img.push({
+            public_id: i.public_id,
+            url: i.url,
         });
-        return getImages;
-    };
+    });
     useEffect(() => {
+        if (images.length > 0) {
+            const newImage = images[images.length - 1];
+            formik.setFieldValue("images", [
+                { public_id: newImage.public_id, url: newImage.url },
+            ]);
+        }
+    }, [images]);
+    useEffect(() => {
+        dispatch(resetState());
         dispatch(getBlogCategories());
     }, []);
-    useEffect(() => {
-        formik.values.images = newImages();
-    }, [newImages()]);
     const formik = useFormik({
+        enableReinitialize: true,
         initialValues: {
-            images: "",
-            title: "",
-            category: "",
-            description: "",
+            title: blogName || "",
+            description: blogDesc || "",
+            category: blogCate || "",
         },
         validationSchema: schema,
         onSubmit: (values) => {
-            dispatch(createBlog(values));
+            dispatch(
+                !!BlogId
+                    ? updateBlog({ id: BlogId, blogData: values })
+                    : createBlog(values)
+            );
             formik.resetForm();
             setTimeout(() => {
-                dispatch(resetState())
+                dispatch(resetState());
                 navigate("/admin/blog-list");
-            }, 1000);
+            }, 300);
         },
     });
+    const handleDeleteImage = (public_id) => {
+        dispatch(deleteImg(public_id));
+    };
 
     return (
         <div>
-            <h3 className="mb-5 title">Add Blog</h3>
+            <h3 className="mb-5 title">{!!BlogId ? "Edit " : "Add "}Blog</h3>
             <div className="">
                 <form action="" onSubmit={formik.handleSubmit}>
                     <div className="mt-3">
@@ -75,26 +117,36 @@ const Addblog = () => {
                             onCh={formik.handleChange("title")}
                             onBl={formik.handleBlur("title")}
                         />
-                        <div className="error">{formik.touched.title && formik.errors.title}</div>
+                        <div className="error">
+                            {formik.touched.title && formik.errors.title}
+                        </div>
                     </div>
-                    <select
-                        name={"category"}
-                        value={formik.values.category}
-                        onChange={formik.handleChange("category")}
-                        onBlur={formik.handleBlur("category")}
-                        className="form-control py-3 mt-3"
-                        id=""
-                    >
-                        <option value={""} id="">
-                            Select Blog Category
-                        </option>
-                        {bCategories.map((blogCategory, index) => (
-                            <option key={index} value={blogCategory.title} id="">
-                                {blogCategory.title}
+                    <div className="mt-3">
+                        <select
+                            name={"category"}
+                            value={formik.values.category}
+                            onChange={formik.handleChange("category")}
+                            onBlur={formik.handleBlur("category")}
+                            className="form-control py-3"
+                            id=""
+                        >
+                            <option value={""} id="">
+                                Select Blog Category
                             </option>
-                        ))}
-                    </select>
-                    <div className="error">{formik.touched.category && formik.errors.category}</div>
+                            {bCategories?.map((blogCategory, index) => (
+                                <option
+                                    key={index}
+                                    value={blogCategory.title}
+                                    id=""
+                                >
+                                    {blogCategory.title}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="error">
+                            {formik.touched.category && formik.errors.category}
+                        </div>
+                    </div>
                     <div className="mt-3">
                         <ReactQuill
                             theme="snow"
@@ -103,37 +155,70 @@ const Addblog = () => {
                             onChange={formik.handleChange("description")}
                             value={formik.values.description}
                         />
-                         <div className="error">{formik.touched.description && formik.errors.description}</div>
+                        <div className="error">
+                            {formik.touched.description &&
+                                formik.errors.description}
+                        </div>
                     </div>
                     <div className="bg-white border-1 p-5 text-center my-3">
-                        <Dropzone onDrop={(acceptedFiles) => dispatch(uploadImg(acceptedFiles))}>
+                        <Dropzone
+                            onDrop={(acceptedFiles) =>
+                                dispatch(uploadImg(acceptedFiles))
+                            }
+                        >
                             {({ getRootProps, getInputProps }) => (
                                 <section>
                                     <div {...getRootProps()}>
                                         <input {...getInputProps()} />
-                                        <p>Drag 'n' drop some files here, or click to select files</p>
+                                        <p>
+                                            Drag 'n' drop some files here, or
+                                            click to select files
+                                        </p>
                                     </div>
                                 </section>
                             )}
                         </Dropzone>
                     </div>
                     <div className="show-images d-flex flex-wrap gap-3">
-                        {images.map((image, index) => (
+                        {images?.map((image, index) => (
                             <div key={index} className="position-relative">
                                 <button
                                     type="button"
                                     className="btn-close position-absolute"
                                     style={{ top: "4px", right: "4px" }}
                                     onClick={() => {
-                                        dispatch(deleteImg(image.public_id));
+                                        handleDeleteImage(image.public_id);
                                     }}
                                 ></button>
-                                <img src={image.url} width={120} height={120} alt="uploadImg" />
+                                <img
+                                    src={image.url}
+                                    width={120}
+                                    height={120}
+                                    alt="uploadImg"
+                                />
+                            </div>
+                        ))}
+                        {blogImages?.map((image, index) => (
+                            <div key={index} className="position-relative">
+                                <button
+                                    type="button"
+                                    className="btn-close position-absolute"
+                                    style={{ top: "4px", right: "4px" }}
+                                    onClick={() => {
+                                        handleDeleteImage(image.public_id);
+                                    }}
+                                ></button>
+                                <img
+                                    src={image.url}
+                                    width={120}
+                                    height={120}
+                                    alt="uploadImg"
+                                />
                             </div>
                         ))}
                     </div>
                     <button className="btn btn-primary my-3" type="submit">
-                        Add Blog
+                        {!!BlogId ? "Edit " : "Add "}Blog
                     </button>
                 </form>
             </div>
@@ -141,4 +226,4 @@ const Addblog = () => {
     );
 };
 
-export default Addblog;
+export default AddBlog;

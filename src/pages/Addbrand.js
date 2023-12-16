@@ -11,7 +11,7 @@ import {
     updateBrand,
 } from "../features/brand/brandSlice";
 let yup = require("yup");
-const Addbrand = () => {
+const AddBrand = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -89,4 +89,4 @@ const Addbrand = () => {
     );
 };
 
-export default Addbrand;
+export default AddBrand;

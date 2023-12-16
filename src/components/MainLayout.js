@@ -8,7 +8,7 @@ import { TbBrandAirtable } from "react-icons/tb";
 import { BiCategoryAlt, BiColorFill, BiCartAdd } from "react-icons/bi";
 import { Layout, Menu, Button, theme } from "antd";
 import { LiaBlogSolid, LiaThListSolid } from "react-icons/lia";
-import { TbListDetails, TbShoppingCartUp } from "react-icons/tb";
+import { TbListDetails, TbShoppingCartUp, TbLogout2 } from "react-icons/tb";
 import { IoIosNotificationsOutline } from "react-icons/io";
 import { RiCouponLine, RiListIndefinite, RiQuestionAnswerLine } from "react-icons/ri";
 import { ToastContainer } from "react-toastify";
@@ -36,7 +36,12 @@ const MainLayout = () => {
                     mode="inline"
                     defaultSelectedKeys={[""]}
                     onClick={({ key }) => {
-                        if (key === "signout") {
+                        if (key === "sign-out") {
+                            localStorage.clear();
+                            window.location.reload();
+                            setTimeout(() => {
+                                navigate("/");
+                            }, 300);
                         } else {
                             navigate(key);
                         }
@@ -153,6 +158,11 @@ const MainLayout = () => {
                             icon: <RiQuestionAnswerLine className="fs-4" />,
                             label: "Enquiries",
                         },
+                        {
+                            key: "sign-out",
+                            icon: <TbLogout2 className="fs-4" />,
+                            label: "Sign Out",
+                        },
                     ]}
                 />
             </Sider>
@@ -179,17 +189,9 @@ const MainLayout = () => {
                             <IoIosNotificationsOutline className="fs-3" />
                             <div className="notify-count">3</div>
                         </div>
-                        <div
-                            className="d-flex align-items-center gap-3"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
+                        <div className="d-flex align-items-center gap-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div className="avatar">
-                                <img
-                                    src="https://th.bing.com/th/id/OIP.2dHQlhClYZqrjIpQqQWBTAHaLH?w=134&h=200&c=7&r=0&o=5&dpr=1.3&pid=1.7"
-                                    alt="avatar"
-                                />
+                                <img src="https://th.bing.com/th/id/OIP.2dHQlhClYZqrjIpQqQWBTAHaLH?w=134&h=200&c=7&r=0&o=5&dpr=1.3&pid=1.7" alt="avatar" />
                             </div>
                             <div className="info">
                                 <h5>Kim Dat</h5>
@@ -214,16 +216,7 @@ const MainLayout = () => {
                         background: "colorBgContainer",
                     }}
                 >
-                    <ToastContainer
-                        position="top-center"
-                        autoClose={400}
-                        hideProgressBar={false}
-                        newestOnTop={true}
-                        rtl={false}
-                        pauseOnFocusLoss
-                        draggable
-                        theme="light"
-                    />
+                    <ToastContainer position="top-center" autoClose={400} hideProgressBar={false} newestOnTop={true} rtl={false} pauseOnFocusLoss draggable theme="light" />
                     <Outlet />
                 </Content>
             </Layout>

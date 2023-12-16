@@ -2,56 +2,63 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
-import Resetpassword from "./pages/Resetpassword";
-import Forgotpassword from "./pages/Forgotpassword";
 import MainLayout from "./components/MainLayout";
 import Enquiries from "./pages/Enquiries";
-import Bloglist from "./pages/Bloglist";
-import Blogcatlist from "./pages/Blogcatlist";
+import ListBlog from "./pages/ListBlog";
+import ListBlogCate from "./pages/ListBlogCate";
 import Orders from "./pages/Orders";
 import Customers from "./pages/Customers";
-import Colorlist from "./pages/Colorlist";
-import Categorylist from "./pages/Categorylist";
-import Brandlist from "./pages/Brandlist";
-import Productlist from "./pages/Productlist";
-import Addblog from "./pages/Addblog";
-import Addblogcat from "./pages/Addblogcat";
-import Addcolor from "./pages/Addcolor";
-import Addcategory from "./pages/Addcategory";
-import Addbrand from "./pages/Addbrand";
-import Addproduct from "./pages/Addproduct";
+import ListColor from "./pages/ListColor";
+import ListProductCate from "./pages/ListProductCate";
+import ListBrand from "./pages/ListBrand";
+import ListProduct from "./pages/ListProduct";
+import AddBlog from "./pages/AddBlog";
+import AddBlogCate from "./pages/AddBlogCate";
+import AddColor from "./pages/AddColor";
+import AddProductCate from "./pages/AddProductCate";
+import AddBrand from "./pages/AddBrand";
+import AddProduct from "./pages/AddProduct";
 import AddCoupon from "./pages/AddCoupon";
-import CouponList from "./pages/CouponList";
+import ListCoupon from "./pages/ListCoupon";
+import ViewEnquiry from "./pages/ViewEnquiry";
+import ViewOrder from "./pages/ViewOrder";
+import PrivateRoutes from "./routing/PrivateRouter";
+import PublicRoutes from "./routing/PublicRouter";
+import BlockCustomer from "./pages/BlockCustomer";
 function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Login />}></Route>
-                <Route path="/reset-password" element={<Resetpassword />}></Route>
-                <Route path="/forgot-password" element={<Forgotpassword />}></Route>
-                <Route path="/admin" element={<MainLayout />}>
+                <Route path="/" element={<PublicRoutes><Login /></PublicRoutes>}></Route>
+                <Route path="/admin" element={<PrivateRoutes><MainLayout /></PrivateRoutes>}>
                     <Route index element={<Dashboard />}></Route>
                     <Route path="enquiries" element={<Enquiries />}></Route>
-                    <Route path="blog" element={<Addblog />}></Route>
-                    <Route path="blog-list" element={<Bloglist />}></Route>
+                    <Route path="enquiry/:id" element={<ViewEnquiry />}></Route>
+                    <Route path="blog" element={<AddBlog />}></Route>
+                    <Route path="blog/:id" element={<AddBlog />}></Route>
+                    <Route path="blog-list" element={<ListBlog />}></Route>
                     <Route path="coupon" element={<AddCoupon />}></Route>
                     <Route path="coupon/:id" element={<AddCoupon />}></Route>
-                    <Route path="coupon-list" element={<CouponList />}></Route>
-                    <Route path="blog-category" element={<Addblogcat />}></Route>
-                    <Route path="blog-category-list" element={<Blogcatlist />}></Route>
+                    <Route path="coupon-list" element={<ListCoupon />}></Route>
+                    <Route path="blog-category" element={<AddBlogCate />}></Route>
+                    <Route path="blog-category/:id" element={<AddBlogCate />}></Route>
+                    <Route path="blog-category-list" element={<ListBlogCate />}></Route>
                     <Route path="orders" element={<Orders />}></Route>
+                    <Route path="order/:id" element={<ViewOrder />}></Route>
                     <Route path="customers" element={<Customers />}></Route>
-                    <Route path="color" element={<Addcolor />}></Route>
-                    <Route path="color/:id" element={<Addcolor />}></Route>
-                    <Route path="color-list" element={<Colorlist />}></Route>
-                    <Route path="category" element={<Addcategory />}></Route>
-                    <Route path="category/:id" element={<Addcategory />}></Route>
-                    <Route path="category-list" element={<Categorylist />}></Route>
-                    <Route path="brand" element={<Addbrand />}></Route>
-                    <Route path="brand/:id" element={<Addbrand />}></Route>
-                    <Route path="brand-list" element={<Brandlist />}></Route>
-                    <Route path="product" element={<Addproduct />}></Route>
-                    <Route path="product-list" element={<Productlist />}></Route>
+                    <Route path="blocked-customers" element={<BlockCustomer />}></Route>
+                    <Route path="color" element={<AddColor />}></Route>
+                    <Route path="color/:id" element={<AddColor />}></Route>
+                    <Route path="color-list" element={<ListColor />}></Route>
+                    <Route path="category" element={<AddProductCate />}></Route>
+                    <Route path="category/:id" element={<AddProductCate />}></Route>
+                    <Route path="category-list" element={<ListProductCate />}></Route>
+                    <Route path="brand" element={<AddBrand />}></Route>
+                    <Route path="brand/:id" element={<AddBrand />}></Route>
+                    <Route path="brand-list" element={<ListBrand />}></Route>
+                    <Route path="product" element={<AddProduct />}></Route>
+                    <Route path="product/:id" element={<AddProduct />}></Route>
+                    <Route path="product-list" element={<ListProduct />}></Route>
                 </Route>
             </Routes>
         </Router>

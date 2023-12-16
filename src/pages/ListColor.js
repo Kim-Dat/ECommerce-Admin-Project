@@ -3,17 +3,13 @@ import React, { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 import { Button, Input, Space, Table } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import {
-    getColors,
-    resetState,
-    deleteColor,
-} from "../features/color/colorSlice";
+import { getColors, resetState, deleteColor } from "../features/color/colorSlice";
 import { Link } from "react-router-dom";
 import { BiEdit } from "react-icons/bi";
 import { MdOutlineDelete } from "react-icons/md";
 import CustomModal from "../components/CustomModal";
 
-const Colorlist = () => {
+const ListColor = () => {
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const [open, setOpen] = useState(false);
@@ -36,13 +32,7 @@ const Colorlist = () => {
         setSearchText("");
     };
     const getColumnSearchProps = (dataIndex) => ({
-        filterDropdown: ({
-            setSelectedKeys,
-            selectedKeys,
-            confirm,
-            clearFilters,
-            close,
-        }) => (
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
             <div
                 style={{
                     padding: 8,
@@ -53,12 +43,8 @@ const Colorlist = () => {
                     ref={searchInput}
                     placeholder={`Search ${dataIndex}`}
                     value={selectedKeys[0]}
-                    onChange={(e) =>
-                        setSelectedKeys(e.target.value ? [e.target.value] : [])
-                    }
-                    onPressEnter={() =>
-                        handleSearch(selectedKeys, confirm, dataIndex)
-                    }
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
                     style={{
                         marginBottom: 8,
                         display: "block",
@@ -67,9 +53,7 @@ const Colorlist = () => {
                 <Space>
                     <Button
                         type="primary"
-                        onClick={() =>
-                            handleSearch(selectedKeys, confirm, dataIndex)
-                        }
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
                         icon={<SearchOutlined />}
                         size="small"
                         style={{
@@ -79,9 +63,7 @@ const Colorlist = () => {
                         Search
                     </Button>
                     <Button
-                        onClick={() =>
-                            clearFilters && handleReset(clearFilters)
-                        }
+                        onClick={() => clearFilters && handleReset(clearFilters)}
                         size="small"
                         style={{
                             width: 90,
@@ -108,11 +90,7 @@ const Colorlist = () => {
                 }}
             />
         ),
-        onFilter: (value, record) =>
-            record[dataIndex]
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
+        onFilter: (value, record) => record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownOpenChange: (visible) => {
             if (visible) {
                 setTimeout(() => searchInput.current?.select(), 100);
@@ -159,25 +137,20 @@ const Colorlist = () => {
 
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(resetState());
         dispatch(getColors());
+        dispatch(resetState());
     }, []);
 
     const { colors } = useSelector((state) => state.color);
     const handleColor = colors.map((color, index) => ({
         ...color,
+        title: <div style={{ width: "20px", height: "20px", backgroundColor: color.title, borderRadius: "50%" }}></div>,
         action: (
             <div className="d-flex align-items-center flex-nowrap justify-content-start">
-                <Link
-                    to={`/admin/color/${color._id}`}
-                    className="fs-4 text-primary"
-                >
+                <Link to={`/admin/color/${color._id}`} className="fs-4 text-primary">
                     <BiEdit />
                 </Link>
-                <button
-                    className="ms-3 fs-3 text-danger bg-transparent border-0"
-                    onClick={() => showModal(color._id)}
-                >
+                <button className="ms-3 fs-3 text-danger bg-transparent border-0" onClick={() => showModal(color._id)}>
                     <MdOutlineDelete />
                 </button>
             </div>
@@ -192,11 +165,7 @@ const Colorlist = () => {
     return (
         <div>
             <h3 className="mb-5 title">Colors</h3>
-            <Table
-                columns={columns}
-                dataSource={handleColor}
-                className="box-shadow"
-            />
+            <Table columns={columns} dataSource={handleColor} className="box-shadow" />
             <CustomModal
                 hideModal={hideModal}
                 open={open}
@@ -209,4 +178,4 @@ const Colorlist = () => {
     );
 };
 
-export default Colorlist;
+export default ListColor;

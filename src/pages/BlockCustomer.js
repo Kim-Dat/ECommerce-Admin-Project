@@ -1,13 +1,11 @@
-import { SearchOutlined } from "@ant-design/icons";
 import React, { useEffect, useRef, useState } from "react";
-import Highlighter from "react-highlight-words";
+import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Space, Table } from "antd";
-import { Link } from "react-router-dom";
-import { BiEdit } from "react-icons/bi";
-import { MdOutlineDelete } from "react-icons/md";
+import Highlighter from "react-highlight-words";
 import { useDispatch, useSelector } from "react-redux";
-import { getBlogCategories } from "../features/bCategory/bCategorySilce";
-const Blogcatlist = () => {
+import { getBlocks } from "../features/auth/authSlice";
+const BlockCustomer = () => {
+    const dispatch = useDispatch();
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const searchInput = useRef(null);
@@ -105,49 +103,44 @@ const Blogcatlist = () => {
             title: "RowHead",
             dataIndex: "key",
             rowScope: "row",
-            width: "5%",
         },
         {
-            title: "Title",
-            dataIndex: "title",
-            key: "title",
-            width: "25%",
-            ...getColumnSearchProps("title"),
-            sorter: (a, b) => a.title.length - b.title.length,
+            title: "Name",
+            dataIndex: "name",
+            key: "name",
+
+            ...getColumnSearchProps("name"),
+            sorter: (a, b) => a.name.length - b.name.length,
             sortDirections: ["descend", "ascend"],
         },
         {
-            title: "Action",
-            dataIndex: "action",
-            key: "action",
-            width: "15%",
+            title: "Email",
+            dataIndex: "email",
+            key: "email",
+        },
+        {
+            title: "Mobile",
+            dataIndex: "mobile",
+            key: "mobile",
         },
     ];
-    const dispatch = useDispatch();
-    const {bCategories} = useSelector((state) => state.blogCategory)
-    const handleBlogCategories = bCategories.map((blogCategory, index) => ({
-        ...blogCategory,
-        action: (
-            <div className="d-flex align-items-center flex-nowrap justify-content-start">
-                <Link to={"/"} className="fs-4 text-primary">
-                    <BiEdit />
-                </Link>
-                <Link to={"/"} className={"fs-4 ms-3 text-danger"}>
-                    <MdOutlineDelete />
-                </Link>
-            </div>
-        ),
-        key: index + 1,
-    }));
+    const blocksState = useSelector((state) => state.auth.blocks);
+    const dataCustomerBlogs =
+        blocksState &&
+        blocksState.map((customer, index) => ({
+            ...customer,
+            name: `${customer.firstName} ${customer.lastName}`,
+            key: index + 1,
+        }));
     useEffect(() => {
-        dispatch(getBlogCategories())
-    }, [])
+        dispatch(getBlocks());
+    }, []);
     return (
         <div>
-            <h3 className="mb-5 title">Blog Categories</h3>
-            <Table columns={columns} dataSource={handleBlogCategories} className="box-shadow" />
+            <h3 className="mb-3 title">Customers block list</h3>
+            <Table columns={columns} dataSource={dataCustomerBlogs} className="box-shadow" />
         </div>
     );
 };
 
-export default Blogcatlist;
+export default BlockCustomer;

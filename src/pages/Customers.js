@@ -4,9 +4,10 @@ import Highlighter from "react-highlight-words";
 import { Button, Input, Space, Table } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { getUsers } from "../features/customers/customerSlice";
-
+import { isBlockCustomer } from "../features/auth/authSlice";
+import { Link } from "react-router-dom";
+import { MdBlock } from "react-icons/md";
 const Customers = () => {
-    /* table */
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const searchInput = useRef(null);
@@ -104,13 +105,12 @@ const Customers = () => {
             title: "RowHead",
             dataIndex: "key",
             rowScope: "row",
-            width: "5%",
         },
         {
             title: "Name",
             dataIndex: "name",
             key: "name",
-            width: "25%",
+
             ...getColumnSearchProps("name"),
             sorter: (a, b) => a.name.length - b.name.length,
             sortDirections: ["descend", "ascend"],
@@ -119,39 +119,48 @@ const Customers = () => {
             title: "Email",
             dataIndex: "email",
             key: "email",
-            width: "30%",
         },
         {
             title: "Mobile",
             dataIndex: "mobile",
             key: "mobile",
-            width: "10%",
         },
         {
-            title: "Address",
-            dataIndex: "address",
-            key: "address",
-            ...getColumnSearchProps("address"),
-            sorter: (a, b) => a.address.length - b.address.length,
-            sortDirections: ["descend", "ascend"],
+            title: "Blocked",
+            dataIndex: "blocked",
+            key: "blocked",
         },
     ];
     /* handle */
     const dispatch = useDispatch();
     const { customers } = useSelector((state) => state.customer);
+    const handleCheckboxChange = (id) => {
+        dispatch(isBlockCustomer(id));
+    };
     const dataCustomerUser = customers
         .filter((customer) => customer.role !== "admin")
         .map((customer, index) => ({
             ...customer,
-            name: `${customer.firstname} ${customer.lastname}`,
-            key: index + 1
-        }))
+            name: `${customer.firstName} ${customer.lastName}`,
+            blocked: (
+                <div className="form-check">
+                    <input className="form-check-input fs-5" type="checkbox" value="" id="flexCheckDefault" defaultChecked={customer.isBlocked} onChange={() => handleCheckboxChange(customer._id)} />
+                </div>
+            ),
+            key: index + 1,
+        }));
     useEffect(() => {
         dispatch(getUsers());
     }, []);
+
     return (
         <div>
-            <h3 className="mb-5 title">Customers</h3>
+            <h3 className="mb-3 title">Customers</h3>
+            <div className="fs-6 py-2">
+                <Link to={"/admin/blocked-customers"} className="d-flex align-items-center">
+                    Customer block list <MdBlock className="ms-2" />
+                </Link>
+            </div>
             <Table columns={columns} dataSource={dataCustomerUser} className="box-shadow" />
         </div>
     );

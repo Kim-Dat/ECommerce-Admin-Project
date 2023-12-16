@@ -10,14 +10,29 @@ const login = async (userData) => {
     return res.data;
 };
 
-const getAllOrders = async () => {
-    const res = await axios.get(`${base_url}user/all-orders`, config);
+const getMonthlyOrders = async () => {
+    const res = await axios.get(`${base_url}user/month-income`, config);
+    return res.data;
+};
+const getYearlyOrders = async () => {
+    const res = await axios.get(`${base_url}user/year-orders`, config);
     return res.data;
 };
 
+const isBlockCustomer = async (id) => {
+    const res = await axios.patch(`${base_url}user/block-user`, { userId: id }, config);
+    return res.data;
+};
+const getBlocks = async (id) => {
+    const res = await axios.get(`${base_url}user/blocks`, config);
+    return res.data;
+};
 const authService = {
     login,
-    getAllOrders,
+    getMonthlyOrders,
+    getYearlyOrders,
+    isBlockCustomer,
+    getBlocks,
 };
 
 export default authService;

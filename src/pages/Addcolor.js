@@ -8,11 +8,11 @@ import {
     createColor,
     getColor,
     resetState,
-    updateColor
+    updateColor,
 } from "../features/color/colorSlice";
 let yup = require("yup");
 
-const Addcolor = () => {
+const AddColor = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -91,4 +91,4 @@ const Addcolor = () => {
     );
 };
 
-export default Addcolor;
+export default AddColor;

@@ -1,35 +1,33 @@
+import { SearchOutlined } from "@ant-design/icons";
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import Highlighter from "react-highlight-words";
+import { Button, Input, Space, Table } from "antd";
 import { Link } from "react-router-dom";
 import { BiEdit } from "react-icons/bi";
 import { MdOutlineDelete } from "react-icons/md";
-import { Button, Input, Space, Table } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import Highlighter from "react-highlight-words";
+import { useDispatch, useSelector } from "react-redux";
 import {
-    deleteCategory,
-    getProductCategories,
+    deleteBlogCategory,
+    getBlogCategories,
     resetState,
-} from "../features/pCategory/pCategorySilce";
+} from "../features/bCategory/bCategorySlice";
 import CustomModal from "../components/CustomModal";
 
-const Categorylist = () => {
+const ListBlogCate = () => {
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const [open, setOpen] = useState(false);
-    const [productCategoryId, setProductCategoryId] = useState("");
+    const [blogCateId, setBlogCateId] = useState("");
 
     const showModal = (e) => {
         setOpen(true);
-        setProductCategoryId(e);
+        setBlogCateId(e);
     };
-
     const hideModal = () => {
         setOpen(false);
     };
 
     const searchInput = useRef(null);
-
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
@@ -160,57 +158,55 @@ const Categorylist = () => {
             width: "15%",
         },
     ];
-    const { pCategories } = useSelector((state) => state.productCategory);
-    const handleProductCategories = pCategories.map(
-        (productCategory, index) => ({
-            ...productCategory,
-            action: (
-                <div className="d-flex align-items-center flex-nowrap justify-content-start">
-                    <Link
-                        to={`/admin/category/${productCategory._id}`}
-                        className="fs-4 text-primary"
-                    >
-                        <BiEdit />
-                    </Link>
-                    <button
-                        className="ms-3 fs-3 text-danger bg-transparent border-0"
-                        onClick={() => showModal(productCategory._id)}
-                    >
-                        <MdOutlineDelete />
-                    </button>
-                </div>
-            ),
-            key: index + 1,
-        })
-    );
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(resetState());
-        dispatch(getProductCategories());
+        dispatch(getBlogCategories());
     }, []);
-    const handleDeleteProductCategory = async (e) => {
-        await dispatch(deleteCategory(e));
+    const { bCategories } = useSelector((state) => state.blogCategory);
+    const handleBlogCategories = bCategories.map((blogCategory, index) => ({
+        ...blogCategory,
+        action: (
+            <div className="d-flex align-items-center flex-nowrap justify-content-start">
+                <Link
+                    to={`/admin/blog-category/${blogCategory._id}`}
+                    className="fs-4 text-primary"
+                >
+                    <BiEdit />
+                </Link>
+                <button
+                    className="ms-3 fs-3 text-danger bg-transparent border-0"
+                    onClick={() => showModal(blogCategory._id)}
+                >
+                    <MdOutlineDelete />
+                </button>
+            </div>
+        ),
+        key: index + 1,
+    }));
+    const handleDeleteBlogCate = async (e) => {
         setOpen(false);
-        await dispatch(getProductCategories());
+        await dispatch(deleteBlogCategory(e));
+        await dispatch(getBlogCategories());
     };
     return (
         <div>
-            <h3 className="mb-5 title">Product Categories</h3>
+            <h3 className="mb-5 title">Blog Categories</h3>
             <Table
                 columns={columns}
-                dataSource={handleProductCategories}
+                dataSource={handleBlogCategories}
                 className="box-shadow"
             />
             <CustomModal
                 hideModal={hideModal}
                 open={open}
                 performAction={() => {
-                    handleDeleteProductCategory(productCategoryId);
+                    handleDeleteBlogCate(blogCateId);
                 }}
-                title="Are you sure you want to delete this brand?"
+                title="Are you sure you want to delete this BlogCategory?"
             />
         </div>
     );
 };
 
-export default Categorylist;
+export default ListBlogCate;

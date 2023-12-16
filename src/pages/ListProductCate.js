@@ -1,17 +1,35 @@
-import { SearchOutlined } from "@ant-design/icons";
 import React, { useEffect, useRef, useState } from "react";
-import Highlighter from "react-highlight-words";
-import { Button, Input, Space, Table } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { BiEdit } from "react-icons/bi";
 import { MdOutlineDelete } from "react-icons/md";
-import { useDispatch, useSelector } from "react-redux";
-import { getProducts } from "../features/product/productSlice";
-import { Link } from "react-router-dom";
+import { Button, Input, Space, Table } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import Highlighter from "react-highlight-words";
+import {
+    deleteCategory,
+    getProductCategories,
+    resetState,
+} from "../features/pCategory/pCategorySlice";
+import CustomModal from "../components/CustomModal";
 
-const Productlist = () => {
+const ListProductCate = () => {
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
+    const [open, setOpen] = useState(false);
+    const [productCategoryId, setProductCategoryId] = useState("");
+
+    const showModal = (e) => {
+        setOpen(true);
+        setProductCategoryId(e);
+    };
+
+    const hideModal = () => {
+        setOpen(false);
+    };
+
     const searchInput = useRef(null);
+
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
         setSearchText(selectedKeys[0]);
@@ -22,7 +40,13 @@ const Productlist = () => {
         setSearchText("");
     };
     const getColumnSearchProps = (dataIndex) => ({
-        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+        filterDropdown: ({
+            setSelectedKeys,
+            selectedKeys,
+            confirm,
+            clearFilters,
+            close,
+        }) => (
             <div
                 style={{
                     padding: 8,
@@ -33,8 +57,12 @@ const Productlist = () => {
                     ref={searchInput}
                     placeholder={`Search ${dataIndex}`}
                     value={selectedKeys[0]}
-                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    onChange={(e) =>
+                        setSelectedKeys(e.target.value ? [e.target.value] : [])
+                    }
+                    onPressEnter={() =>
+                        handleSearch(selectedKeys, confirm, dataIndex)
+                    }
                     style={{
                         marginBottom: 8,
                         display: "block",
@@ -43,7 +71,9 @@ const Productlist = () => {
                 <Space>
                     <Button
                         type="primary"
-                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                        onClick={() =>
+                            handleSearch(selectedKeys, confirm, dataIndex)
+                        }
                         icon={<SearchOutlined />}
                         size="small"
                         style={{
@@ -53,7 +83,9 @@ const Productlist = () => {
                         Search
                     </Button>
                     <Button
-                        onClick={() => clearFilters && handleReset(clearFilters)}
+                        onClick={() =>
+                            clearFilters && handleReset(clearFilters)
+                        }
                         size="small"
                         style={{
                             width: 90,
@@ -80,7 +112,11 @@ const Productlist = () => {
                 }}
             />
         ),
-        onFilter: (value, record) => record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+        onFilter: (value, record) =>
+            record[dataIndex]
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
         onFilterDropdownOpenChange: (visible) => {
             if (visible) {
                 setTimeout(() => searchInput.current?.select(), 100);
@@ -106,7 +142,7 @@ const Productlist = () => {
             title: "RowHead",
             dataIndex: "key",
             rowScope: "row",
-            width: "3%",
+            width: "5%",
         },
         {
             title: "Title",
@@ -118,73 +154,63 @@ const Productlist = () => {
             sortDirections: ["descend", "ascend"],
         },
         {
-            title: "Price",
-            dataIndex: "price",
-            key: "price",
-            width: "20%",
-            sorter: (a, b) => a.price - b.price,
-            sortDirections: ["descend", "ascend"],
-        },
-        {
-            title: "Brand",
-            dataIndex: "brand",
-            key: "brand",
-            width: "15%",
-            ...getColumnSearchProps("brand"),
-            sorter: (a, b) => a.brand.length - b.brand.length,
-            sortDirections: ["descend", "ascend"],
-        },
-        {
-            title: "Category",
-            dataIndex: "category",
-            key: "category",
-            width: "15%",
-            ...getColumnSearchProps("category"),
-            sorter: (a, b) => a.category.length - b.category.length,
-            sortDirections: ["descend", "ascend"],
-        },
-        {
-            title: "Color",
-            dataIndex: "color",
-            key: "color",
-            width: "10%",
-            ...getColumnSearchProps("color"),
-            sorter: (a, b) => a.color.length - b.color.length,
-            sortDirections: ["descend", "ascend"],
-        },
-        {
             title: "Action",
             dataIndex: "action",
             key: "action",
             width: "15%",
         },
     ];
-    /* handle */
+    const { pCategories } = useSelector((state) => state.productCategory);
+    const handleProductCategories = pCategories.map(
+        (productCategory, index) => ({
+            ...productCategory,
+            action: (
+                <div className="d-flex align-items-center flex-nowrap justify-content-start">
+                    <Link
+                        to={`/admin/category/${productCategory._id}`}
+                        className="fs-4 text-primary"
+                    >
+                        <BiEdit />
+                    </Link>
+                    <button
+                        className="ms-3 fs-3 text-danger bg-transparent border-0"
+                        onClick={() => showModal(productCategory._id)}
+                    >
+                        <MdOutlineDelete />
+                    </button>
+                </div>
+            ),
+            key: index + 1,
+        })
+    );
     const dispatch = useDispatch();
-    const { products } = useSelector((state) => state.product);
-    const handleProduct = products.map((product, index) => ({
-        ...product,
-        action: (
-            <div className="d-flex align-items-center flex-nowrap justify-content-start">
-                <Link to={"/"} className="fs-4 text-primary">
-                    <BiEdit />
-                </Link>
-                <Link to={"/"} className={"fs-4 ms-3 text-danger"}>
-                    <MdOutlineDelete />
-                </Link>
-            </div>
-        ),
-        key: index,
-    }));
     useEffect(() => {
-        dispatch(getProducts());
+        dispatch(resetState());
+        dispatch(getProductCategories());
     }, []);
+    const handleDeleteProductCategory = async (e) => {
+        await dispatch(deleteCategory(e));
+        setOpen(false);
+        await dispatch(getProductCategories());
+    };
     return (
         <div>
-            <h3 className="mb-5 title">Products</h3>
-            <Table columns={columns} dataSource={handleProduct} className="box-shadow" />
+            <h3 className="mb-5 title">Product Categories</h3>
+            <Table
+                columns={columns}
+                dataSource={handleProductCategories}
+                className="box-shadow"
+            />
+            <CustomModal
+                hideModal={hideModal}
+                open={open}
+                performAction={() => {
+                    handleDeleteProductCategory(productCategoryId);
+                }}
+                title="Are you sure you want to delete this brand?"
+            />
         </div>
     );
 };
 
-export default Productlist;
+export default ListProductCate;

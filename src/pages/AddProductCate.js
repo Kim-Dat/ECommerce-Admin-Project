@@ -9,9 +9,9 @@ import {
     getProductCategory,
     resetState,
     updateCategory,
-} from "../features/pCategory/pCategorySilce";
+} from "../features/pCategory/pCategorySlice";
 let yup = require("yup");
-const Addcategory = () => {
+const AddProductCate = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -100,4 +100,4 @@ const Addcategory = () => {
     );
 };
 
-export default Addcategory;
+export default AddProductCate;

@@ -4,29 +4,29 @@ import Highlighter from "react-highlight-words";
 import { Button, Input, Space, Table } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
-    deleteCoupon,
-    getCoupons,
+    deleteBrand,
+    getBrands,
     resetState,
-} from "../features/coupon/CouponSlice";
+} from "../features/brand/brandSlice";
 import { Link } from "react-router-dom";
 import { BiEdit } from "react-icons/bi";
 import { MdOutlineDelete } from "react-icons/md";
 import CustomModal from "../components/CustomModal";
 
-const CouponList = () => {
+const ListBrand = () => {
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const [open, setOpen] = useState(false);
-    const [couponId, setCouponId] = useState("");
-
+    const [brandId, setBrandId] = useState("");
+    /* modal */
     const showModal = (e) => {
         setOpen(true);
-        setCouponId(e);
+        setBrandId(e);
     };
-
     const hideModal = () => {
         setOpen(false);
     };
+    /* table */
     const searchInput = useRef(null);
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -143,25 +143,13 @@ const CouponList = () => {
             width: "5%",
         },
         {
-            title: "Name",
-            dataIndex: "name",
-            key: "name",
+            title: "Title",
+            dataIndex: "title",
+            key: "title",
             width: "25%",
-            ...getColumnSearchProps("name"),
-            sorter: (a, b) => a.name.length - b.name.length,
+            ...getColumnSearchProps("title"),
+            sorter: (a, b) => a.title.length - b.title.length,
             sortDirections: ["descend", "ascend"],
-        },
-        {
-            title: "Expiry",
-            dataIndex: "expiry",
-            key: "expiry",
-            width: "25%",
-        },
-        {
-            title: "Discount",
-            dataIndex: "discount",
-            key: "discount",
-            width: "15%",
         },
         {
             title: "Action",
@@ -170,52 +158,51 @@ const CouponList = () => {
             width: "15%",
         },
     ];
-
+    /* handle */
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(resetState());
-        dispatch(getCoupons());
+        dispatch(getBrands());
     }, []);
-    const { coupons } = useSelector((state) => state.coupon);
-    const handleCoupon = coupons.map((coupon, index) => ({
-        ...coupon,
+    const { brands } = useSelector((state) => state.brand);
+    const handleBrand = brands.map((brand, index) => ({
+        ...brand,
         action: (
             <div className="d-flex align-items-center flex-nowrap justify-content-start">
                 <Link
-                    to={`/admin/coupon/${coupon._id}`}
+                    to={`/admin/brand/${brand._id}`}
                     className="fs-4 text-primary"
                 >
                     <BiEdit />
                 </Link>
                 <button
                     className="ms-3 fs-3 text-danger bg-transparent border-0"
-                    onClick={() => showModal(coupon._id)}
+                    onClick={() => showModal(brand._id)}
                 >
                     <MdOutlineDelete />
                 </button>
             </div>
         ),
-        expiry: new Date(coupon.expiry).toLocaleDateString(),
         key: index + 1,
     }));
-    const handleDeleteCoupon = async (e) => {
+    const handleDeleteBrand = async (e) => {
         setOpen(false);
-        await dispatch(deleteCoupon(e));
-        await dispatch(getCoupons());
+        await dispatch(deleteBrand(e));
+        await dispatch(getBrands());
     };
     return (
         <div>
             <h3 className="mb-5 title">Brands</h3>
             <Table
                 columns={columns}
-                dataSource={handleCoupon}
+                dataSource={handleBrand}
                 className="box-shadow"
             />
             <CustomModal
                 hideModal={hideModal}
                 open={open}
                 performAction={() => {
-                    handleDeleteCoupon(couponId);
+                    handleDeleteBrand(brandId);
                 }}
                 title="Are you sure you want to delete this brand?"
             />
@@ -223,4 +210,4 @@ const CouponList = () => {
     );
 };
 
-export default CouponList;
+export default ListBrand;

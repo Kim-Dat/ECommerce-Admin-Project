@@ -4,29 +4,27 @@ import Highlighter from "react-highlight-words";
 import { Button, Input, Space, Table } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import {
-    deleteEnquiry,
-    getEnquiries,
+    getBlogs,
     resetState,
-    updateEnquiry,
-} from "../features/enquiry/enquirySlice";
+    deleteBlog,
+} from "../features/blog/blogSlice";
 import { Link } from "react-router-dom";
-import { MdOutlineDelete, MdOutlineRemoveRedEye } from "react-icons/md";
+import { BiEdit } from "react-icons/bi";
+import { MdOutlineDelete } from "react-icons/md";
 import CustomModal from "../components/CustomModal";
-
-const Enquiries = () => {
+const ListBlog = () => {
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const [open, setOpen] = useState(false);
-    const [enquiryId, setEnquiryId] = useState("");
+    const [blogId, setBlogId] = useState("");
 
     const showModal = (e) => {
         setOpen(true);
-        setEnquiryId(e);
+        setBlogId(e);
     };
     const hideModal = () => {
         setOpen(false);
     };
-
     const searchInput = useRef(null);
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
         confirm();
@@ -143,115 +141,79 @@ const Enquiries = () => {
             width: "5%",
         },
         {
-            title: "Name",
-            dataIndex: "name",
-            key: "name",
+            title: "Title",
+            dataIndex: "title",
+            key: "title",
             width: "25%",
-            ...getColumnSearchProps("name"),
-            sorter: (a, b) => a.name.length - b.name.length,
+            ...getColumnSearchProps("title"),
+            sorter: (a, b) => a.title.length - b.title.length,
             sortDirections: ["descend", "ascend"],
         },
         {
-            title: "Email",
-            dataIndex: "email",
-            key: "email",
+            title: "Category",
+            dataIndex: "category",
+            key: "category",
             width: "25%",
-            ...getColumnSearchProps("email"),
-            sorter: (a, b) => a.email.length - b.email.length,
+            ...getColumnSearchProps("category"),
+            sorter: (a, b) => a.category.length - b.category.length,
             sortDirections: ["descend", "ascend"],
-        },
-        {
-            title: "Mobile",
-            dataIndex: "mobile",
-            key: "mobile",
-            width: "15%",
-            ...getColumnSearchProps("mobile"),
-            sorter: (a, b) => a.mobile.length - b.mobile.length,
-            sortDirections: ["descend", "ascend"],
-        },
-        {
-            title: "Status",
-            dataIndex: "status",
-            key: "status",
-            width: "20%",
         },
         {
             title: "Action",
             dataIndex: "action",
             key: "action",
-            width: "20%",
+            width: "15%",
         },
     ];
-
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(resetState())
-        dispatch(getEnquiries());
+        dispatch(resetState());
+        dispatch(getBlogs());
     }, []);
-    const { enquiries } = useSelector((state) => state.enquiry);
-    const handleEnquiry = enquiries.map((enquiry, index) => ({
-        ...enquiry,
+    const { blogs } = useSelector((state) => state.blog);
+    const handleBlog = blogs.map((blog, index) => ({
+        ...blog,
         action: (
             <div className="d-flex align-items-center flex-nowrap justify-content-start">
                 <Link
-                    to={`/admin/enquiry/${enquiry._id}`}
+                    to={`/admin/blog/${blog._id}`}
                     className="fs-4 text-primary"
                 >
-                    <MdOutlineRemoveRedEye />
+                    <BiEdit />
                 </Link>
                 <button
                     className="ms-3 fs-3 text-danger bg-transparent border-0"
-                    onClick={() => showModal(enquiry._id)}
+                    onClick={() => showModal(blog._id)}
                 >
                     <MdOutlineDelete />
                 </button>
             </div>
         ),
-        status: (
-            <>
-                <select
-                    name=""
-                    defaultValue={enquiry.status}
-                    className="form-control form-select"
-                    onChange={(e) =>
-                        setEnquiryStatus(e.target.value, enquiry._id)
-                    }
-                >
-                    <option value={"Submitted"}>Submitted</option>
-                    <option value={"Contacted"}>Contacted</option>
-                    <option value={"In Progress"}>In Progress</option>
-                    <option value={"Resolve"}>Resolve</option>
-                </select>
-            </>
-        ),
         key: index + 1,
     }));
-    const setEnquiryStatus = (o, i) => {
-        dispatch(updateEnquiry({ id: i, status: o }));
-    };
-    const handleDeleteEnquiry = async (e) => {
+    const handleDeleteBlog = async (e) => {
         setOpen(false);
-        await dispatch(deleteEnquiry(e));
-        await dispatch(getEnquiries());
+        await dispatch(deleteBlog(e));
+        await dispatch(getBlogs());
     };
     return (
         <div>
-            <h3 className="mb-5 title">Enquiries</h3>
+            <h3 className="mb-5 title">Blog list</h3>
             <Table
                 columns={columns}
-                dataSource={handleEnquiry}
+                dataSource={handleBlog}
                 className="box-shadow"
             />
             <CustomModal
                 hideModal={hideModal}
                 open={open}
                 performAction={() => {
-                    handleDeleteEnquiry(enquiryId);
+                    handleDeleteBlog(blogId);
                 }}
-                title="Are you sure you want to delete this Enquiry ?"
+                title="Are you sure you want to delete this Blog?"
             />
         </div>
     );
 };
 
-export default Enquiries;
+export default ListBlog;
